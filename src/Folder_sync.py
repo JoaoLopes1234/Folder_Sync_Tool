@@ -1,6 +1,24 @@
 import os
 import hashlib
 import shutil
+import time
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description='Folder synchronization tool')
+    parser.add_argument('source_folder', help='Source folder path')
+    parser.add_argument('replica_folder', help='Replica folder path')
+    parser.add_argument('interval', type=int, help='Synchronization interval in seconds.')
+    parser.add_argument('log_file', help='Log file path')
+    
+    args = parser.parse_args()
+
+    while True:
+        sync_folder(args.source_folder, args.replica_folder, args.log_file)
+        time.sleep(args.interval)
+
+if __name__ == '__main__':
+    main()
 
 def calculate_md5(filename):
     hash_object = hashlib.md5()
