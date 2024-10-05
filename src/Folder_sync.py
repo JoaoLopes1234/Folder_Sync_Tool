@@ -27,3 +27,17 @@ def sync_folder(source_folder, replica_folder, log_file):
             if not os.path.exists(replica_file) or calculate_md5(source_file) != calculate_md5(replica_file):
                 shutil.copy2(source_file, replica_file)
                 print(log_file, f"Copied/Updated: {source_file} -> {replica_file}")
+
+
+    #Remover
+    for foldername, subfolders, filesnames in os.walk(source_folder):
+        relative_path = os.path.relpath(foldername, replica_folder)
+        source_subfolder = os.path.join(source_folder, relative_path)
+        
+        for filename in filesnames:
+            replica_file = os.path.join(foldername, filename)
+            source_file = os.path.join(source_subfolder, filename)
+            
+            if not os.path.exists(source_file):
+                os.remove(replica_file)
+                print(log_file, f"Removed: {replica_file}")
