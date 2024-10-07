@@ -11,7 +11,7 @@ def main():
     parser.add_argument('replica_folder', help='Replica folder path')
     parser.add_argument('interval', type=int,
                         help='Synchronization interval in seconds.')
-    parser.add_argument('--log_file', help='Log file path', default=None)
+    parser.add_argument("log_file", help="Path to the log file.")
 
     args = parser.parse_args()
 
@@ -30,9 +30,10 @@ def calculate_md5(filename):
 
 # Function to synchronize the source folder with the replica folder
 def sync_folder(source_folder, replica_folder, log_file):
-    # Check if the replica folder exists, if not, create it
+    
     if not os.path.exists(source_folder):
         os.makedirs(replica_folder)
+        log_action(log_file, f"Created folder: {replica_folder}")
 
     # Synchronize files and folders from the source to the replica
     for foldername, subfolders, filenames in os.walk(source_folder):
@@ -48,8 +49,9 @@ def sync_folder(source_folder, replica_folder, log_file):
 
             if not os.path.exists(replica_file) or calculate_md5(source_file) != calculate_md5(replica_file):
                 shutil.copy2(source_file, replica_file)
-                print(
-                    log_file, f"Copied/Updated: {source_file} -> {replica_file}")
+                print(log_file, f"Copied/Updated: {source_file} -> {replica_file}")
+                log_action(log_file, f"Copied/Updated: {source_file} -> {replica_file}")
+
     # Remove files that exist in the replica but not in the source
     for foldername, subfolders, filenames in os.walk(replica_folder, topdown=False):
         relative_path = os.path.relpath(foldername, replica_folder)
@@ -62,10 +64,18 @@ def sync_folder(source_folder, replica_folder, log_file):
             if not os.path.exists(source_file):
                 os.remove(replica_file)
                 print(log_file, f"Removed: {replica_file}")
+                log_action(log_file, f"Removed: {replica_file}")
         # Remove empty folders in the replica that don't exist in the source
         if not os.path.exists(source_subfolder) and not os.listdir(foldername):
             os.rmdir(foldername)
             print(log_file, f"Removed empty folder: {foldername}")
+            log_action(log_file, f"Removed empty folder: {foldername}")
+
+# Function to log actions to both the console and a file
+def log_action(log_file, message):
+    print(message)  
+    with open(log_file, "a") as f:  
+        f.write(f"{time.ctime()}: {message}\n")
 
 
 if __name__ == '__main__':
